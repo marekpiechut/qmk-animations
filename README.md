@@ -146,3 +146,11 @@ Here's what worked for me:
 ```
 
 This will still leave you few simple LED effects and free quite a lot of memory.
+
+# Support
+
+If you like this, maybe you'll also like some other stuff I'm working on:
+
+- Ergonomic mechanical keyboards at [D1Keyboards](https://d1keyboards.com)
+- JS Podcast (polish) ["Po Prostu JS"](https://poprostujs.pl)
+- Or just drop me a line or check what's new at [@marekpiechut](https://twitter.com/marekpiechut)

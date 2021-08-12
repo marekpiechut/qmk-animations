@@ -6,6 +6,8 @@ keyboard firmware.
 They are tested on my [Corne Keyboard](https://github.com/foostan/crkbd) build,
 but should work just fine on any other with 128x32 OLED display (Lily58, Sofle, etc.).
 
+You can preview all animations on [Demo page](demo.md)
+
 # How to use
 
 To use any of these you need to be building your firmware locally.
@@ -50,24 +52,29 @@ This will play animation only on secondary half of the keyboard. Adjust to your 
 
 ## Enable animation
 
-Just copy selected animation `.c` file to your keymap folder, include it at the top and use inside `keymap.c`:
+Just copy all animation `.c` files to your keymap folder, include selected one at the top and use inside `keymap.c`:
 
 ```c
 /**
  * Put this somewhere at the beginning of the file --
  * Make sure you import only one of animations at a time
  * They all have same function exported, so it won't compile if you
- * include more than one at a time
+ * include more than one at a time. You can also configure some options
+ * before including the animation. Not all animations support them, but some do :P.
  */
+#define ANIM_INVERT false
+#define ANIM_RENDER_WPM true
+#define FAST_TYPE_WPM 45 //Switch to fast animation when over words per minute
+
 #ifdef OLED_DRIVER_ENABLE
-    #include "music-bars.c"
+    #include "demon.c"
 #endif
 
 // -- Probably some other stuff and then --
 
 #ifdef OLED_DRIVER_ENABLE
 void oled_task_user(void) {
-    if (!is_master) {
+    if (!is_keyboard_master()) {
         oled_render_anim();
     }
 }

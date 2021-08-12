@@ -11,9 +11,9 @@
 #pragma once
 
 //-------- CONFIGURATION START --------
-
-#define FAST_TYPE_WPS 45 //Switch to fast animation when over words per minute
-
+#ifndef FAST_TYPE_WPM
+    #define FAST_TYPE_WPM 45 //Switch to fast animation when over words per minute
+#endif
 //-------- CONFIGURATION END--------
 
 
@@ -215,25 +215,15 @@ static void oled_render_anim(void) {
 
 
     static uint32_t anim_timer = 0;
-    static uint32_t anim_sleep = 0;
     static uint8_t current_frame = 0;
 
     const uint8_t speed = get_current_wpm();
 
-    if (speed != 000) {
-        oled_on();
-
-        if (timer_elapsed32(anim_timer) > ANIM_FRAME) {
-            anim_timer = timer_read32();
-            const char* frame = speed > FAST_TYPE_WPS ? FAST_TYPE_FRAMES[current_frame] : SLOW_TYPE_FRAMES[current_frame];
-            oled_write_raw_P(frame, ANIM_SIZE);
-            current_frame = (current_frame + 1) % 3;
-            oled_render_speed();
-        }
-
-        anim_sleep = timer_read32();
-    } else if (timer_elapsed32(anim_sleep) > OLED_TIMEOUT) {
-        oled_off();
-        current_frame = 0;
+    if (timer_elapsed32(anim_timer) > ANIM_FRAME) {
+        anim_timer = timer_read32();
+        const char* frame = speed > FAST_TYPE_WPM ? FAST_TYPE_FRAMES[current_frame] : SLOW_TYPE_FRAMES[current_frame];
+        oled_write_raw_P(frame, ANIM_SIZE);
+        current_frame = (current_frame + 1) % 3;
+        oled_render_speed();
     }
 }

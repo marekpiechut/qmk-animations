@@ -26,6 +26,7 @@
 //-------- CONFIGURATION END--------
 
 #define ANIM_WPM_WIDTH 22
+#define OLED_ROWS OLED_DISPLAY_HEIGHT / 4
 
 static void oled_render_wpm(void) {
   static char wpm_str[4];
@@ -41,12 +42,13 @@ static void oled_render_anim_frame(const char **fast_frames, const char **slow_f
 
   static uint32_t anim_timer = 0;
   static uint8_t current_frame = 0;
-  static uint8_t frame_offset = ANIM_RENDER_WPM ? ANIM_WPM_WIDTH : 0;
+  static int16_t frame_offset = ANIM_RENDER_WPM ? ANIM_WPM_WIDTH : 0;
+  static int8_t step = 8;
 
   const uint8_t speed = get_current_wpm();
 
 
-  if (timer_elapsed32(anim_timer) > ANIM_FRAME_TIME) {
+  if (timer_elapsed32(anim_timer) > ANIM_FRAME_TIME && speed > 0) {
     oled_set_cursor(0, 0);
     anim_timer = timer_read32();
 
@@ -66,21 +68,32 @@ static void oled_render_anim_frame(const char **fast_frames, const char **slow_f
         oled_write_raw_byte((ANIM_INVERT ? ~bg : bg), offset);
       } else if (col <= OLED_DISPLAY_WIDTH) {
         uint8_t row = offset / OLED_DISPLAY_WIDTH;
-        uint8_t col_data = pgm_read_byte(frame + ((offset - frame_offset) % ANIM_FRAME_WIDTH) + (ANIM_FRAME_WIDTH * row));
+        int frame_data_offset = ANIM_FRAME_WIDTH * row + col - frame_offset;
+        uint8_t col_data = pgm_read_byte(frame + frame_data_offset);
         oled_write_raw_byte(ANIM_INVERT ? ~col_data : col_data, offset );
       }
     }
 
     #ifdef ANIM_SCROLL
     if(is_fast) {
-      frame_offset =  frame_offset > OLED_DISPLAY_WIDTH - 8 ? frame_start_offset : (frame_offset + 8);
-    } else if (frame_offset > (OLED_DISPLAY_WIDTH - ANIM_FRAME_WIDTH) || frame_offset < ANIM_FRAME_WIDTH) {
+      #ifdef ANIM_BOUNCE
+      if(frame_offset + ANIM_FRAME_WIDTH > OLED_DISPLAY_WIDTH || frame_offset < frame_start_offset) {
+        step = -step;
+      }
+      #endif
+
+      frame_offset += step;
+
+      if(frame_offset >= OLED_DISPLAY_WIDTH) {
+        frame_offset = frame_start_offset - ANIM_FRAME_WIDTH + step;
+      }
+    } else if (frame_offset > (OLED_DISPLAY_WIDTH - ANIM_FRAME_WIDTH) || frame_offset < frame_start_offset) {
       frame_offset = frame_start_offset;
     }
     #endif
+  }
 
-    if(ANIM_RENDER_WPM) {
-      oled_render_wpm();
-    }
+  if(ANIM_RENDER_WPM) {
+    oled_render_wpm();
   }
 }

@@ -13,6 +13,7 @@
 
 #define ANIM_SCROLL true
 #define ANIM_FRAME_WIDTH 32
+#define ANIM_SIZE 144
 
 #include "animation-utils.c"
 
